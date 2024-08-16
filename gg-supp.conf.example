@@ -1,0 +1,20 @@
+# config file for gg-supp dc bot
+
+# enable adding for other people (True, False)
+thirdparty_add = False
+
+# if comand and list the same channel the msg's can't be seperatet!
+autodelet_list    = True
+autodelet_command = False
+
+# guild id → Server id
+guild_id = <your id>
+
+# channel id's for the bot
+# it is posible that list and command are the same chanel
+channel_id_comand = <your id>
+channel_id_list   = <your id>
+channel_id_archiv = <your id>
+
+# Discord bot token
+key = <your token>
