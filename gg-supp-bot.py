@@ -126,9 +126,9 @@ def new_action(li: list) -> str:
         return "thirdparty_add are not enabled"
 
 
-def update_list(titel: str):
+def update_list(titel: str, file_name: str = "open.csv"):
     """reads the file and upload it to channel_id_list"""
-    li: list = csv_list()
+    li: list = csv_list(file_name)
     # check if list is empthy
     if len(li) == 0:
         return ("# Keine Bestellung offen")
@@ -169,14 +169,14 @@ def get_time() -> str:
 def bestellung() -> None:
     """move csv to archiv and create new file"""
     date_time = get_time()
-    os.system(f"mv open.csv archiv/{date_time}")
+    os.system(f"mkdir -p archiv && mv open.csv archiv/{date_time}.csv")
     os.system("touch open.csv")
 
 
-async def delet(channel_id: int) -> None:
+async def delet(channel_id: int, limit: int = 5) -> None:
     """delet the last msg from chanel"""
     channel = client.get_channel(channel_id)
-    async for message in channel.history(limit=5):
+    async for message in channel.history(limit=limit):
         await message.delete()
         await asyncio.sleep(1)
 
@@ -220,6 +220,34 @@ def slash() -> None:
 
         await ordered()
         await interaction.response.send_message(":thumbsup:")
+
+    @tree.command(
+        name="rebuild_archiv",
+        description=(f"delet the last 100 msg from"
+                     f"#{config["channel_id_archiv"]} and reuplod them"),
+        guild=discord.Object(id=config["guild_id"])
+    )
+    async def rebuild_archiv(interaction):
+
+        await interaction.response.send_message(":thumbsup:")
+        await delet(config["channel_id_archiv"], 100)
+        old_orders = os.listdir("archiv")
+        old_orders.sort()
+        channel = client.get_channel(config["channel_id_archiv"])
+        for i in old_orders:
+            title = (i.split("_"))[0]
+            await channel.send(update_list(f"# Bestellt am {title}",
+                                           f"archiv/{i}"))
+
+    # @tree.command(guild=discord.Object(id=config["guild_id"]))
+    # async def deletemsg(interaction: discord.Interaction,
+    #                     number: int, chanel: str = None):
+    #     if chanel is None:
+    #         chanel = interaction.channel.id
+    #     await interaction.response.send_message(":thumbsup:")
+    #     await delet(int(chanel), number)
+    #     # await interaction.response.send_message(f'{number=} {chanel=}',
+    #     #                                         ephemeral=True)
 
 
 @client.event
